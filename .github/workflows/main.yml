@@ -1,0 +1,33 @@
+name: Send Job Notification Email
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # ✅ config.json 파일을 'file' 폴더 안에 생성하도록 수정
+    - name: Create config file from secret
+      run: echo "${{ secrets.CONFIG_JSON }}" > file/config.json
+
+    # ✅ 파이썬 스크립트를 'file' 폴더 안에서 실행하도록 수정
+    - name: Run email script
+      working-directory: ./file
+      env:
+        SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+        SMTP_PORT: ${{ secrets.SMTP_PORT }}
+        SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+        SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      run: python send_email.py
